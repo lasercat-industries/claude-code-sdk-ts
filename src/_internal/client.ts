@@ -1,5 +1,5 @@
 import { SubprocessCLITransport } from './transport/subprocess-cli.js';
-import type { ClaudeCodeOptions, Message, CLIOutput, AssistantMessage, CLIAssistantOutput, CLIErrorOutput } from '../types.js';
+import type { ClaudeCodeOptions, Message, CLIOutput, AssistantMessage, CLIAssistantOutput, CLIErrorOutput, CLIUserOutput, ToolResultBlock, ToolResultMessage, HookFeedbackMessage } from '../types.js';
 import { detectErrorType, createTypedError } from '../errors.js';
 import { loadSafeEnvironmentOptions } from '../environment.js';
 import { applyEnvironmentOptions } from './options-merger.js';
@@ -36,6 +36,14 @@ export class InternalClient {
   private parseMessage(output: CLIOutput): Message | null {
     // Handle CLIOutput types based on actual CLI output
     switch (output.type) {
+      case 'user': {
+        const userMsg = output as CLIUserOutput;
+        return {
+          type: 'tool_result',
+          content: userMsg.message.content,
+          session_id: userMsg.sessionId,
+        } as ToolResultMessage;
+      }
       case 'assistant': {
         // Extract the actual assistant message from the wrapper
         const assistantMsg = output as CLIAssistantOutput;

@@ -49,6 +49,18 @@ export interface UserMessage {
   session_id?: string;
 }
 
+export interface ToolResultMessage {
+  type: 'tool_result';
+  content: ToolResultBlock[] | string[];
+  session_id?: string;
+}
+
+export interface HookFeedbackMessage {
+  type: 'hook_feedback';
+  content: string[];
+  session_id?: string;
+}
+
 export interface AssistantMessage {
   type: 'assistant';
   content: ContentBlock[];
@@ -82,7 +94,7 @@ export interface ResultMessage {
   };
 }
 
-export type Message = UserMessage | AssistantMessage | SystemMessage | ResultMessage;
+export type Message = UserMessage | AssistantMessage | SystemMessage | ResultMessage | ToolResultMessage | HookFeedbackMessage;
 
 // MCP server configuration
 export interface MCPServer {
@@ -145,6 +157,30 @@ export interface CLIEnd {
   type: 'end';
 }
 
+export interface CLIUserOutput {
+  type: 'user';
+  message: {
+    role: 'user';
+    content: ToolResultBlock[] | string[];
+  }
+  toolUseResult?: {
+    mode: 'content';
+    numFiles: number;
+    filesNames: string[];
+    content: string;
+    numLines: number;
+  }
+  uuid: string;
+  timestamp: string;
+  sessionId: string;
+  userType: 'external';
+  isSideChain: boolean;
+  parentUuid: string;
+  cwd: string;
+  version: string;
+  gitBranch: string;
+}
+
 // Actual CLI output types (what the CLI actually returns)
 export interface CLIAssistantOutput {
   type: 'assistant';
@@ -185,7 +221,7 @@ export interface CLIErrorOutput {
   };
 }
 
-export type CLIOutput = CLIAssistantOutput | CLISystemOutput | CLIResultOutput | CLIErrorOutput | CLIMessage | CLIError | CLIEnd;
+export type CLIOutput = CLIAssistantOutput | CLISystemOutput | CLIResultOutput | CLIUserOutput | CLIErrorOutput | CLIMessage | CLIError | CLIEnd;
 
 // Re-export new permission and configuration types
 export * from './types/permissions.js';
